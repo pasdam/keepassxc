@@ -22,8 +22,8 @@
 #include <QtPlugin>
 #include <Windows.h>
 
-#include "autotype/AutoTypePlatformPlugin.h"
 #include "autotype/AutoTypeAction.h"
+#include "autotype/AutoTypePlatformPlugin.h"
 
 class AutoTypePlatformWin : public QObject, public AutoTypePlatformInterface
 {
@@ -39,7 +39,6 @@ public:
     bool registerGlobalShortcut(Qt::Key key, Qt::KeyboardModifiers modifiers) override;
     void unregisterGlobalShortcut(Qt::Key key, Qt::KeyboardModifiers modifiers) override;
     int platformEventFilter(void* event) override;
-    int initialTimeout() override;
     bool raiseWindow(WId window) override;
     AutoTypeExecutor* createExecutor() override;
 
@@ -72,4 +71,3 @@ private:
 };
 
 #endif // KEEPASSX_AUTOTYPEWINDOWS_H
-

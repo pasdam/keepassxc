@@ -20,9 +20,9 @@
 #include <QStandardPaths>
 
 #if defined(Q_OS_UNIX) && !defined(Q_OS_LINUX)
-#include <sys/types.h>
 #include <sys/event.h>
 #include <sys/time.h>
+#include <sys/types.h>
 #include <unistd.h>
 #endif
 
@@ -36,14 +36,17 @@
 #include <io.h>
 #endif
 
-NativeMessagingBase::NativeMessagingBase()
+NativeMessagingBase::NativeMessagingBase(const bool enabled)
 {
 #ifdef Q_OS_WIN
+    Q_UNUSED(enabled);
     _setmode(_fileno(stdin), _O_BINARY);
     _setmode(_fileno(stdout), _O_BINARY);
 #else
-    m_notifier.reset(new QSocketNotifier(fileno(stdin), QSocketNotifier::Read, this));
-    connect(m_notifier.data(), SIGNAL(activated(int)), this, SLOT(newNativeMessage()));
+    if (enabled) {
+        m_notifier.reset(new QSocketNotifier(fileno(stdin), QSocketNotifier::Read, this));
+        connect(m_notifier.data(), SIGNAL(activated(int)), this, SLOT(newNativeMessage()));
+    }
 #endif
 }
 
@@ -51,7 +54,7 @@ void NativeMessagingBase::newNativeMessage()
 {
 #if defined(Q_OS_UNIX) && !defined(Q_OS_LINUX)
     struct kevent ev[1];
-    struct timespec ts = { 5, 0 };
+    struct timespec ts = {5, 0};
 
     int fd = kqueue();
     if (fd == -1) {
@@ -121,21 +124,22 @@ void NativeMessagingBase::sendReply(const QJsonObject& json)
 void NativeMessagingBase::sendReply(const QString& reply)
 {
     if (!reply.isEmpty()) {
-        uint len = reply.length();
-        std::cout << char(((len>>0) & 0xFF)) << char(((len>>8) & 0xFF)) << char(((len>>16) & 0xFF)) << char(((len>>24) & 0xFF));
+        QByteArray bytes = reply.toUtf8();
+        uint len = bytes.size();
+        std::cout << char(((len >> 0) & 0xFF)) << char(((len >> 8) & 0xFF)) << char(((len >> 16) & 0xFF))
+                  << char(((len >> 24) & 0xFF));
         std::cout << reply.toStdString() << std::flush;
     }
 }
 
 QString NativeMessagingBase::getLocalServerPath() const
 {
-#if defined(Q_OS_WIN)
-    return QStandardPaths::writableLocation(QStandardPaths::TempLocation) + "/kpxc_server";
-#elif defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
-    // Use XDG_RUNTIME_DIR instead of /tmp/ if it's available
-    QString path = QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation) + "/kpxc_server";
-    return path.isEmpty() ? "/tmp/kpxc_server" : path;
-#else   // Q_OS_MAC and others
-    return "/tmp/kpxc_server";
+    const QString serverPath = "/kpxc_server";
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
+    // Use XDG_RUNTIME_DIR instead of /tmp if it's available
+    QString path = QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation);
+    return path.isEmpty() ? QStandardPaths::writableLocation(QStandardPaths::TempLocation) + serverPath : path + serverPath;
+#else // Q_OS_MAC, Q_OS_WIN and others
+    return QStandardPaths::writableLocation(QStandardPaths::TempLocation) + serverPath;
 #endif
 }

@@ -26,32 +26,33 @@
 #include <QPointer>
 #include <QSet>
 #include <QUrl>
+#include <QUuid>
 
 #include "core/AutoTypeAssociations.h"
 #include "core/CustomData.h"
 #include "core/EntryAttachments.h"
 #include "core/EntryAttributes.h"
 #include "core/TimeInfo.h"
-#include "core/Uuid.h"
 
 class Database;
 class Group;
 
-enum class EntryReferenceType {
+enum class EntryReferenceType
+{
     Unknown,
     Title,
     UserName,
     Password,
     Url,
     Notes,
-    Uuid,
+    QUuid,
     CustomAttributes
 };
 
 struct EntryData
 {
     int iconNumber;
-    Uuid customIcon;
+    QUuid customIcon;
     QColor foregroundColor;
     QColor backgroundColor;
     QString overrideUrl;
@@ -71,12 +72,12 @@ class Entry : public QObject
 public:
     Entry();
     ~Entry();
-    Uuid uuid() const;
+    const QUuid& uuid() const;
     QImage icon() const;
     QPixmap iconPixmap() const;
     QPixmap iconScaledPixmap() const;
     int iconNumber() const;
-    Uuid iconUuid() const;
+    const QUuid& iconUuid() const;
     QColor foregroundColor() const;
     QColor backgroundColor() const;
     QString overrideUrl() const;
@@ -116,9 +117,9 @@ public:
     static const QString AutoTypeSequenceUsername;
     static const QString AutoTypeSequencePassword;
 
-    void setUuid(const Uuid& uuid);
+    void setUuid(const QUuid& uuid);
     void setIcon(int iconNumber);
-    void setIcon(const Uuid& uuid);
+    void setIcon(const QUuid& uuid);
     void setForegroundColor(const QColor& color);
     void setBackgroundColor(const QColor& color);
     void setOverrideUrl(const QString& url);
@@ -142,18 +143,20 @@ public:
     void removeHistoryItems(const QList<Entry*>& historyEntries);
     void truncateHistory();
 
-    enum CloneFlag {
-        CloneNoFlags        = 0,
-        CloneNewUuid        = 1,  // generate a random uuid for the clone
-        CloneResetTimeInfo  = 2,  // set all TimeInfo attributes to the current time
-        CloneIncludeHistory = 4,  // clone the history items
-        CloneRenameTitle    = 8,  // add "-Clone" after the original title
-        CloneUserAsRef      = 16, // Add the user as a reference to the original entry
-        ClonePassAsRef      = 32, // Add the password as a reference to the original entry
+    enum CloneFlag
+    {
+        CloneNoFlags = 0,
+        CloneNewUuid = 1, // generate a random uuid for the clone
+        CloneResetTimeInfo = 2, // set all TimeInfo attributes to the current time
+        CloneIncludeHistory = 4, // clone the history items
+        CloneRenameTitle = 8, // add "-Clone" after the original title
+        CloneUserAsRef = 16, // Add the user as a reference to the original entry
+        ClonePassAsRef = 32, // Add the password as a reference to the original entry
     };
     Q_DECLARE_FLAGS(CloneFlags, CloneFlag)
 
-    enum class PlaceholderType {
+    enum class PlaceholderType
+    {
         NotPlaceholder,
         Unknown,
         Title,
@@ -229,7 +232,7 @@ private:
     const Database* database() const;
     template <class T> bool set(T& property, const T& value);
 
-    Uuid m_uuid;
+    QUuid m_uuid;
     EntryData m_data;
     QPointer<EntryAttributes> m_attributes;
     QPointer<EntryAttachments> m_attachments;

@@ -24,10 +24,9 @@
 #include "config-keepassx-tests.h"
 
 #include "core/Metadata.h"
-#include "core/Tools.h"
 #include "crypto/Crypto.h"
-#include "crypto/kdf/AesKdf.h"
 #include "crypto/CryptoHash.h"
+#include "crypto/kdf/AesKdf.h"
 #include "format/KeePass2Reader.h"
 #include "format/KeePass2Writer.h"
 #include "keys/FileKey.h"
@@ -110,6 +109,7 @@ void TestKeys::testFileKey()
     QCOMPARE(db->metadata()->name(), QString("%1 Database").arg(name));
 }
 
+// clang-format off
 void TestKeys::testFileKey_data()
 {
     QTest::addColumn<FileKey::Type>("type");
@@ -120,6 +120,7 @@ void TestKeys::testFileKey_data()
     QTest::newRow("Hex")             << FileKey::FixedBinaryHex << QString("Hex");
     QTest::newRow("Hashed")          << FileKey::Hashed         << QString("Hashed");
 }
+// clang-format on
 
 void TestKeys::testCreateFileKey()
 {
@@ -229,7 +230,8 @@ void TestKeys::benchmarkTransformKey()
     kdf.setSeed(seed);
     kdf.setRounds(1e6);
 
-    QBENCHMARK {
+    QBENCHMARK
+    {
         Q_UNUSED(compositeKey.transform(kdf, result));
     };
 }

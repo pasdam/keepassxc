@@ -42,25 +42,43 @@ int Generate::execute(const QStringList& arguments)
 
     QCommandLineParser parser;
     parser.setApplicationDescription(this->description);
-    QCommandLineOption len(QStringList() << "L" << "length",
-                                QObject::tr("Length of the generated password."),
-                                QObject::tr("length"));
+    QCommandLineOption len(QStringList() << "L"
+                                         << "length",
+                           QObject::tr("Length of the generated password"),
+                           QObject::tr("length"));
     parser.addOption(len);
-    QCommandLineOption lower(QStringList() << "l",
-                               QObject::tr("Use lowercase characters in the generated password."));
+    QCommandLineOption lower(QStringList() << "l"
+                                           << "lower",
+                             QObject::tr("Use lowercase characters"));
     parser.addOption(lower);
-    QCommandLineOption upper(QStringList() << "u",
-                               QObject::tr("Use uppercase characters in the generated password."));
+    QCommandLineOption upper(QStringList() << "u"
+                                           << "upper",
+                             QObject::tr("Use uppercase characters"));
     parser.addOption(upper);
-    QCommandLineOption numeric(QStringList() << "n",
-                               QObject::tr("Use numbers in the generated password."));
+    QCommandLineOption numeric(QStringList() << "n"
+                                             << "numeric",
+                               QObject::tr("Use numbers."));
     parser.addOption(numeric);
-    QCommandLineOption special(QStringList() << "s",
-                               QObject::tr("Use special characters in the generated password."));
+    QCommandLineOption special(QStringList() << "s"
+                                             << "special",
+                               QObject::tr("Use special characters"));
     parser.addOption(special);
-    QCommandLineOption extended(QStringList() << "e",
-                               QObject::tr("Use extended ASCII in the generated password."));
+    QCommandLineOption extended(QStringList() << "e"
+                                              << "extended",
+                                QObject::tr("Use extended ASCII"));
     parser.addOption(extended);
+    QCommandLineOption exclude(QStringList() << "x"
+                                             << "exclude",
+                               QObject::tr("Exclude character set"),
+                               QObject::tr("chars"));
+    parser.addOption(exclude);
+    QCommandLineOption exclude_similar(QStringList() << "exclude-similar",
+                                       QObject::tr("Exclude similar looking characters"));
+    parser.addOption(exclude_similar);
+    QCommandLineOption every_group(QStringList() << "every-group",
+                                   QObject::tr("Include characters from every selected group"));
+    parser.addOption(every_group);
+
     parser.process(arguments);
 
     const QStringList args = parser.positionalArguments();
@@ -81,23 +99,33 @@ int Generate::execute(const QStringList& arguments)
     PasswordGenerator::CharClasses classes = 0x0;
 
     if (parser.isSet(lower)) {
-        classes |= PasswordGenerator::LowerLetters; 
+        classes |= PasswordGenerator::LowerLetters;
     }
     if (parser.isSet(upper)) {
-        classes |= PasswordGenerator::UpperLetters; 
+        classes |= PasswordGenerator::UpperLetters;
     }
     if (parser.isSet(numeric)) {
-        classes |= PasswordGenerator::Numbers; 
+        classes |= PasswordGenerator::Numbers;
     }
     if (parser.isSet(special)) {
-        classes |= PasswordGenerator::SpecialCharacters; 
+        classes |= PasswordGenerator::SpecialCharacters;
     }
     if (parser.isSet(extended)) {
-        classes |= PasswordGenerator::EASCII; 
+        classes |= PasswordGenerator::EASCII;
+    }
+
+    PasswordGenerator::GeneratorFlags flags = 0x0;
+
+    if (parser.isSet(exclude_similar)) {
+        flags |= PasswordGenerator::ExcludeLookAlike;
+    }
+    if (parser.isSet(every_group)) {
+        flags |= PasswordGenerator::CharFromEveryGroup;
     }
 
     passwordGenerator.setCharClasses(classes);
-    passwordGenerator.setFlags(PasswordGenerator::DefaultFlags);
+    passwordGenerator.setFlags(flags);
+    passwordGenerator.setExcludedChars(parser.value(exclude));
 
     if (!passwordGenerator.isValid()) {
         outputTextStream << parser.helpText().replace("keepassxc-cli", "keepassxc-cli generate");

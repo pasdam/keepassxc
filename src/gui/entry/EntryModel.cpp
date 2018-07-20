@@ -17,12 +17,12 @@
 
 #include "EntryModel.h"
 
+#include <QDateTime>
 #include <QFont>
 #include <QFontMetrics>
 #include <QMimeData>
-#include <QPalette>
-#include <QDateTime>
 #include <QPainter>
+#include <QPalette>
 
 #include "core/DatabaseIcons.h"
 #include "core/Entry.h"
@@ -185,14 +185,16 @@ QVariant EntryModel::data(const QModelIndex& index, int role) const
             return result;
         case Notes:
             // Display only first line of notes in simplified format
-            result = entry->resolveMultiplePlaceholders(entry->notes().section("\n", 0, 0).simplified());
+            result = entry->notes().section("\n", 0, 0).simplified();
             if (attr->isReference(EntryAttributes::NotesKey)) {
                 result.prepend(tr("Ref: ", "Reference abbreviation"));
             }
             return result;
         case Expires:
             // Display either date of expiry or 'Never'
-            result = entry->timeInfo().expires() ? entry->timeInfo().expiryTime().toLocalTime().toString(EntryModel::DateFormat) : tr("Never");
+            result = entry->timeInfo().expires()
+                         ? entry->timeInfo().expiryTime().toLocalTime().toString(EntryModel::DateFormat)
+                         : tr("Never");
             return result;
         case Created:
             result = entry->timeInfo().creationTime().toLocalTime().toString(EntryModel::DateFormat);
@@ -426,7 +428,7 @@ void EntryModel::entryRemoved()
 void EntryModel::entryDataChanged(Entry* entry)
 {
     int row = m_entries.indexOf(entry);
-    emit dataChanged(index(row, 0), index(row, columnCount()-1));
+    emit dataChanged(index(row, 0), index(row, columnCount() - 1));
 }
 
 void EntryModel::severConnections()

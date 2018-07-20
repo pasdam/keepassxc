@@ -18,16 +18,16 @@
 #ifndef KEEPASSX_EDITWIDGETPROPERTIES_H
 #define KEEPASSX_EDITWIDGETPROPERTIES_H
 
-#include <QStandardItemModel>
 #include <QItemSelection>
 #include <QPointer>
+#include <QStandardItemModel>
 #include <QWidget>
 
 #include "core/CustomData.h"
 #include "core/TimeInfo.h"
-#include "core/Uuid.h"
 
-namespace Ui {
+namespace Ui
+{
     class EditWidgetProperties;
 }
 
@@ -39,7 +39,7 @@ public:
     explicit EditWidgetProperties(QWidget* parent = nullptr);
     ~EditWidgetProperties();
 
-    void setFields(const TimeInfo& timeInfo, const Uuid& uuid);
+    void setFields(const TimeInfo& timeInfo, const QUuid& uuid);
     void setCustomData(const CustomData* customData);
 
     const CustomData* customData() const;

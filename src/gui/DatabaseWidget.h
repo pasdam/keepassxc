@@ -19,16 +19,15 @@
 #ifndef KEEPASSX_DATABASEWIDGET_H
 #define KEEPASSX_DATABASEWIDGET_H
 
+#include <QFileSystemWatcher>
 #include <QScopedPointer>
 #include <QStackedWidget>
-#include <QFileSystemWatcher>
 #include <QTimer>
-
-#include "core/Uuid.h"
 
 #include "gui/entry/EntryModel.h"
 #include "gui/MessageWidget.h"
 #include "gui/csvImport/CsvImportWizard.h"
+#include "gui/entry/EntryModel.h"
 
 class ChangeMasterKeyWidget;
 class DatabaseOpenWidget;
@@ -51,7 +50,8 @@ class DetailsWidget;
 class UnlockDatabaseDialog;
 class QFileSystemWatcher;
 
-namespace Ui {
+namespace Ui
+{
     class SearchWidget;
 }
 
@@ -82,7 +82,7 @@ public:
     void setCurrentWidget(QWidget* widget);
     DatabaseWidget::Mode currentMode() const;
     void lock();
-    void updateFilePath(const QString &filePath);
+    void updateFilePath(const QString& filePath);
     int numberOfSelectedEntries() const;
     QStringList customEntryAttributes() const;
     bool isGroupSelected() const;
@@ -176,7 +176,9 @@ public slots:
     void setSearchLimitGroup(bool state);
     void endSearch();
 
-    void showMessage(const QString& text, MessageWidget::MessageType type, bool showClosebutton = true,
+    void showMessage(const QString& text,
+                     MessageWidget::MessageType type,
+                     bool showClosebutton = true,
                      int autoHideTimeout = MessageWidget::DefaultAutoHideTimeout);
     void showErrorMessage(const QString& errorMessage);
     void hideMessage();
@@ -201,7 +203,7 @@ private slots:
     // Database autoreload slots
     void onWatchedFileChanged();
     void reloadDatabaseFile();
-    void restoreGroupEntryFocus(Uuid groupUuid, Uuid EntryUuid);
+    void restoreGroupEntryFocus(const QUuid& groupUuid, const QUuid& EntryUuid);
     void unblockAutoReload();
 
 private:
@@ -231,8 +233,8 @@ private:
     Entry* m_newEntry;
     Group* m_newParent;
     QString m_filePath;
-    Uuid m_groupBeforeLock;
-    Uuid m_entryBeforeLock;
+    QUuid m_groupBeforeLock;
+    QUuid m_entryBeforeLock;
     MessageWidget* m_messageWidget;
     DetailsWidget* m_detailsView;
 

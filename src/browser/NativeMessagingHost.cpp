@@ -16,18 +16,22 @@
 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "NativeMessagingHost.h"
+#include "BrowserSettings.h"
+#include "sodium.h"
 #include <QMutexLocker>
 #include <QtNetwork>
 #include <iostream>
-#include "sodium.h"
-#include "NativeMessagingHost.h"
-#include "BrowserSettings.h"
 
-NativeMessagingHost::NativeMessagingHost(DatabaseTabWidget* parent) :
-    NativeMessagingBase(),
-    m_mutex(QMutex::Recursive),
-    m_browserClients(m_browserService),
-    m_browserService(parent)
+#ifdef Q_OS_WIN
+#include <Winsock2.h>
+#endif
+
+NativeMessagingHost::NativeMessagingHost(DatabaseTabWidget* parent, const bool enabled)
+    : NativeMessagingBase(enabled)
+    , m_mutex(QMutex::Recursive)
+    , m_browserClients(m_browserService)
+    , m_browserService(parent)
 {
     m_localServer.reset(new QLocalServer(this));
     m_localServer->setSocketOptions(QLocalServer::UserAccessOption);
@@ -61,17 +65,24 @@ void NativeMessagingHost::run()
 
     // Update KeePassXC/keepassxc-proxy binary paths to Native Messaging scripts
     if (BrowserSettings::updateBinaryPath()) {
-        BrowserSettings::updateBinaryPaths(BrowserSettings::useCustomProxy() ? BrowserSettings::customProxyLocation() : "");
+        BrowserSettings::updateBinaryPaths(BrowserSettings::useCustomProxy() ? BrowserSettings::customProxyLocation()
+                                                                             : "");
     }
 
     m_running.store(true);
 #ifdef Q_OS_WIN
-    m_future = QtConcurrent::run(this, static_cast<void(NativeMessagingHost::*)()>(&NativeMessagingHost::readNativeMessages));
+    m_future =
+        QtConcurrent::run(this, static_cast<void (NativeMessagingHost::*)()>(&NativeMessagingHost::readNativeMessages));
 #endif
 
     if (BrowserSettings::supportBrowserProxy()) {
         QString serverPath = getLocalServerPath();
         QFile::remove(serverPath);
+
+        // Ensure that STDIN is not being listened when proxy is used
+        if (m_notifier && m_notifier->isEnabled()) {
+            m_notifier->setEnabled(false);
+        }
 
         if (m_localServer->isListening()) {
             m_localServer->close();
@@ -101,24 +112,32 @@ void NativeMessagingHost::readLength()
     if (!std::cin.eof() && length > 0) {
         readStdIn(length);
     } else {
-    	m_notifier->setEnabled(false);
+        m_notifier->setEnabled(false);
     }
 }
 
 void NativeMessagingHost::readStdIn(const quint32 length)
 {
-    if (length > 0) {
-        QByteArray arr;
-        arr.reserve(length);
+    if (length <= 0) {
+        return;
+    }
 
-        for (quint32 i = 0; i < length; ++i) {
-            arr.append(getchar());
-        }
+    QByteArray arr;
+    arr.reserve(length);
 
-        if (arr.length() > 0) {
-            QMutexLocker locker(&m_mutex);
-            sendReply(m_browserClients.readResponse(arr));
+    QMutexLocker locker(&m_mutex);
+
+    for (quint32 i = 0; i < length; ++i) {
+        int c = std::getchar();
+        if (c == EOF) {
+            // message ended prematurely, ignore it and return
+            return;
         }
+        arr.append(static_cast<char>(c));
+    }
+
+    if (arr.length() > 0) {
+        sendReply(m_browserClients.readResponse(arr));
     }
 }
 
@@ -134,9 +153,15 @@ void NativeMessagingHost::newLocalConnection()
 void NativeMessagingHost::newLocalMessage()
 {
     QLocalSocket* socket = qobject_cast<QLocalSocket*>(QObject::sender());
-
     if (!socket || socket->bytesAvailable() <= 0) {
         return;
+    }
+
+    socket->setReadBufferSize(NATIVE_MSG_MAX_LENGTH);
+    int socketDesc = socket->socketDescriptor();
+    if (socketDesc) {
+        int max = NATIVE_MSG_MAX_LENGTH;
+        setsockopt(socketDesc, SOL_SOCKET, SO_SNDBUF, reinterpret_cast<char*>(&max), sizeof(max));
     }
 
     QByteArray arr = socket->readAll();

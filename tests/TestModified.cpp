@@ -23,7 +23,6 @@
 #include "core/Database.h"
 #include "core/Group.h"
 #include "core/Metadata.h"
-#include "core/Tools.h"
 #include "crypto/Crypto.h"
 
 QTEST_GUILESS_MAIN(TestModified)
@@ -116,7 +115,7 @@ void TestModified::testGroupSets()
 
     QSignalSpy spyModified(db.data(), SIGNAL(modifiedImmediate()));
 
-    root->setUuid(Uuid::random());
+    root->setUuid(QUuid::createUuid());
     QCOMPARE(spyModified.count(), ++spyCount);
     root->setUuid(root->uuid());
     QCOMPARE(spyModified.count(), spyCount);
@@ -136,13 +135,13 @@ void TestModified::testGroupSets()
     root->setIcon(root->iconNumber());
     QCOMPARE(spyModified.count(), spyCount);
 
-    root->setIcon(Uuid::random());
+    root->setIcon(QUuid::createUuid());
     QCOMPARE(spyModified.count(), ++spyCount);
     root->setIcon(root->iconUuid());
     QCOMPARE(spyModified.count(), spyCount);
 
 
-    group->setUuid(Uuid::random());
+    group->setUuid(QUuid::createUuid());
     QCOMPARE(spyModified.count(), ++spyCount);
     group->setUuid(group->uuid());
     QCOMPARE(spyModified.count(), spyCount);
@@ -162,7 +161,7 @@ void TestModified::testGroupSets()
     group->setIcon(group->iconNumber());
     QCOMPARE(spyModified.count(), spyCount);
 
-    group->setIcon(Uuid::random());
+    group->setIcon(QUuid::createUuid());
     QCOMPARE(spyModified.count(), ++spyCount);
     group->setIcon(group->iconUuid());
     QCOMPARE(spyModified.count(), spyCount);
@@ -181,7 +180,7 @@ void TestModified::testEntrySets()
 
     QSignalSpy spyModified(db.data(), SIGNAL(modifiedImmediate()));
 
-    entry->setUuid(Uuid::random());
+    entry->setUuid(QUuid::createUuid());
     QCOMPARE(spyModified.count(), ++spyCount);
     entry->setUuid(entry->uuid());
     QCOMPARE(spyModified.count(), spyCount);
@@ -216,7 +215,7 @@ void TestModified::testEntrySets()
     entry->setIcon(entry->iconNumber());
     QCOMPARE(spyModified.count(), spyCount);
 
-    entry->setIcon(Uuid::random());
+    entry->setIcon(QUuid::createUuid());
     QCOMPARE(spyModified.count(), ++spyCount);
     entry->setIcon(entry->iconUuid());
     QCOMPARE(spyModified.count(), spyCount);
@@ -285,7 +284,7 @@ void TestModified::testHistoryItems()
 {
     QScopedPointer<Entry> entry(new Entry());
     QDateTime created = entry->timeInfo().creationTime();
-    entry->setUuid(Uuid::random());
+    entry->setUuid(QUuid::createUuid());
     entry->setTitle("a");
     entry->setTags("a");
     QScopedPointer<EntryAttributes> attributes(new EntryAttributes());
@@ -306,7 +305,7 @@ void TestModified::testHistoryItems()
     entry->setTitle("b");
     entry->endUpdate();
     QCOMPARE(entry->historyItems().size(), ++historyItemsSize);
-    auto *historyEntry = entry->historyItems().at(historyItemsSize - 1);
+    auto* historyEntry = entry->historyItems().at(historyItemsSize - 1);
     QCOMPARE(historyEntry->title(), QString("a"));
     QCOMPARE(historyEntry->uuid(), entry->uuid());
     QCOMPARE(historyEntry->tags(), entry->tags());
@@ -474,7 +473,6 @@ void TestModified::testHistoryMaxSize()
     entry1->endUpdate();
     QCOMPARE(entry1->attachments()->attachmentsSize(), 6000 + key.size());
     QCOMPARE(entry1->historyItems().size(), 4);
-
 
     auto entry2 = new Entry();
     entry2->setGroup(db->rootGroup());

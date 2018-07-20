@@ -19,6 +19,8 @@
 #include "core/Database.h"
 #include "core/Endian.h"
 
+#define UUID_LENGTH 16
+
 /**
  * Read KDBX magic header numbers from a device.
  *
@@ -71,7 +73,9 @@ Database* KdbxReader::readDatabase(QIODevice* device, const CompositeKey& key, b
 
     // read KDBX magic numbers
     quint32 sig1, sig2;
-    readMagicNumbers(&headerStream, sig1, sig2, m_kdbxVersion);
+    if (!readMagicNumbers(&headerStream, sig1, sig2, m_kdbxVersion)) {
+        return nullptr;
+    }
     m_kdbxSignature = qMakePair(sig1, sig2);
 
     // mask out minor version
@@ -131,12 +135,16 @@ KeePass2::ProtectedStreamAlgo KdbxReader::protectedStreamAlgo() const
  */
 void KdbxReader::setCipher(const QByteArray& data)
 {
-    if (data.size() != Uuid::Length) {
-        raiseError(tr("Invalid cipher uuid length"));
+    if (data.size() != UUID_LENGTH) {
+        raiseError(tr("Invalid cipher uuid length: %1 (length=%2)").arg(QString(data)).arg(data.size()));
         return;
     }
 
-    Uuid uuid(data);
+    QUuid uuid = QUuid::fromRfc4122(data);
+    if (uuid.isNull()) {
+        raiseError(tr("Unable to parse UUID: %1").arg(QString(data)));
+        return;
+    }
 
     if (SymmetricCipher::cipherToAlgorithm(uuid) == SymmetricCipher::InvalidAlgorithm) {
         raiseError(tr("Unsupported cipher"));
@@ -247,8 +255,8 @@ void KdbxReader::setInnerRandomStreamID(const QByteArray& data)
     }
     auto id = Endian::bytesToSizedInt<quint32>(data, KeePass2::BYTEORDER);
     KeePass2::ProtectedStreamAlgo irsAlgo = KeePass2::idToProtectedStreamAlgo(id);
-    if (irsAlgo == KeePass2::ProtectedStreamAlgo::InvalidProtectedStreamAlgo ||
-        irsAlgo == KeePass2::ProtectedStreamAlgo::ArcFourVariant) {
+    if (irsAlgo == KeePass2::ProtectedStreamAlgo::InvalidProtectedStreamAlgo
+        || irsAlgo == KeePass2::ProtectedStreamAlgo::ArcFourVariant) {
         raiseError(tr("Invalid inner random stream cipher"));
         return;
     }

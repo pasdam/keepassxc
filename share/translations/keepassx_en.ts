@@ -2362,10 +2362,6 @@ This is a one-way migration. You won&apos;t be able to open the imported databas
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Unable to decrypt entry string</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Duplicate custom attribute found</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2579,6 +2575,33 @@ This is a one-way migration. You won&apos;t be able to open the imported databas
     </message>
 </context>
 <context>
+    <name>KeePass2</name>
+    <message>
+        <source>AES: 256-bit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Twofish: 256-bit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ChaCha20: 256-bit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>AES-KDF (KDBX 4)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>AES-KDF (KDBX 3.1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Argon2 (KDBX 4 – recommended)</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>Main</name>
     <message>
         <source>Existing single-instance lock file is invalid. Launching new instance.</source>
@@ -2598,6 +2621,10 @@ This is a one-way migration. You won&apos;t be able to open the imported databas
     </message>
     <message>
         <source>KeePassXC - Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Database password: </source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3477,30 +3504,6 @@ Available commands:
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>AES: 256-bit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Twofish: 256-bit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>ChaCha20: 256-bit</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Argon2 (KDBX 4 – recommended)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>AES-KDF (KDBX 4)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>AES-KDF (KDBX 3.1)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Group</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3629,6 +3632,45 @@ Available commands:
     </message>
     <message>
         <source>Internal zlib error: </source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>SSHAgent</name>
+    <message>
+        <source>Agent connection failed.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Agent protocol error.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No agent running, cannot add identity.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No agent running, cannot remove identity.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Agent does not have this identity.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Agent refused this identity. Possible reasons include:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The key has already been added.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Restricted lifetime is not supported by the agent (check options).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A confirmation request is not supported by the agent (check options).</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3862,10 +3904,6 @@ Please unlock the selected database or choose another one which is unlocked.</so
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Auto-Type delay</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source> ms</source>
         <comment>Milliseconds</comment>
         <translation type="unfinished"></translation>
@@ -3892,6 +3930,14 @@ Please unlock the selected database or choose another one which is unlocked.</so
     </message>
     <message>
         <source>General</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Auto-Type typing delay</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Auto-Type start delay</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4030,6 +4076,17 @@ Please unlock the selected database or choose another one which is unlocked.</so
     <name>UnlockDatabaseWidget</name>
     <message>
         <source>Unlock database</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>UrlFetchProgressDialog</name>
+    <message>
+        <source>Download Progress</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Downloading %1.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

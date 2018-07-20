@@ -18,8 +18,8 @@
 
 #include "EditWidget.h"
 #include "ui_EditWidget.h"
-#include <QScrollArea>
 #include <QPushButton>
+#include <QScrollArea>
 
 #include "core/FilePath.h"
 
@@ -38,8 +38,7 @@ EditWidget::EditWidget(QWidget* parent)
     headlineLabel()->setFont(headerLabelFont);
     headlineLabel()->setTextFormat(Qt::PlainText);
 
-    connect(m_ui->categoryList, SIGNAL(categoryChanged(int)),
-            m_ui->stackedWidget, SLOT(setCurrentIndex(int)));
+    connect(m_ui->categoryList, SIGNAL(categoryChanged(int)), m_ui->stackedWidget, SLOT(setCurrentIndex(int)));
 
     connect(m_ui->buttonBox, SIGNAL(accepted()), SIGNAL(accepted()));
     connect(m_ui->buttonBox, SIGNAL(rejected()), SIGNAL(rejected()));
@@ -103,8 +102,7 @@ void EditWidget::setReadOnly(bool readOnly)
 
     if (readOnly) {
         m_ui->buttonBox->setStandardButtons(QDialogButtonBox::Close);
-    }
-    else {
+    } else {
         m_ui->buttonBox->setStandardButtons(QDialogButtonBox::Ok | QDialogButtonBox::Cancel | QDialogButtonBox::Apply);
         // Find and connect the apply button
         QPushButton* applyButton = m_ui->buttonBox->button(QDialogButtonBox::Apply);
@@ -117,10 +115,24 @@ bool EditWidget::readOnly() const
     return m_readOnly;
 }
 
+void EditWidget::enableApplyButton(bool enabled)
+{
+    QPushButton* applyButton = m_ui->buttonBox->button(QDialogButtonBox::Apply);
+    if (applyButton) {
+        applyButton->setEnabled(enabled);
+    }
+}
+
 void EditWidget::showMessage(const QString& text, MessageWidget::MessageType type)
 {
-    m_ui->messageWidget->setCloseButtonVisible(false);
-    m_ui->messageWidget->showMessage(text, type, 2000);
+    // Show error messages for a longer time to make sure the user can read them
+    if (type == MessageWidget::Error) {
+        m_ui->messageWidget->setCloseButtonVisible(true);
+        m_ui->messageWidget->showMessage(text, type, 15000);
+    } else {
+        m_ui->messageWidget->setCloseButtonVisible(false);
+        m_ui->messageWidget->showMessage(text, type, 2000);
+    }
 }
 
 void EditWidget::hideMessage()

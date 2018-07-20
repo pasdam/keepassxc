@@ -21,8 +21,8 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QSettings>
-#include <QTemporaryFile>
 #include <QStandardPaths>
+#include <QTemporaryFile>
 
 Config* Config::m_instance(nullptr);
 
@@ -80,7 +80,7 @@ Config::Config(QObject* parent)
         QString userPath;
         QString homePath = QDir::homePath();
 
-    #if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
+#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
         // we can't use QStandardPaths on X11 as it uses XDG_DATA_HOME instead of XDG_CONFIG_HOME
         QByteArray env = qgetenv("XDG_CONFIG_HOME");
         if (env.isEmpty()) {
@@ -95,17 +95,17 @@ Config::Config(QObject* parent)
         }
 
         userPath += "/keepassxc/";
-    #else
+#else
         userPath = QDir::fromNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::DataLocation));
         // storageLocation() appends the application name ("/keepassxc") to the end
         userPath += "/";
-    #endif
+#endif
 
-    #ifdef QT_DEBUG
+#ifdef QT_DEBUG
         userPath += "keepassxc_debug.ini";
-    #else
+#else
         userPath += "keepassxc.ini";
-    #endif
+#endif
 
         init(userPath);
     }
@@ -135,6 +135,7 @@ void Config::init(const QString& fileName)
     m_defaults.insert("AutoTypeEntryTitleMatch", true);
     m_defaults.insert("AutoTypeEntryURLMatch", true);
     m_defaults.insert("AutoTypeDelay", 25);
+    m_defaults.insert("AutoTypeStartDelay", 500);
     m_defaults.insert("UseGroupIconOnEntryCreation", true);
     m_defaults.insert("IgnoreGroupExpansion", true);
     m_defaults.insert("security/clearclipboard", true);
@@ -149,6 +150,7 @@ void Config::init(const QString& fileName)
     m_defaults.insert("security/autotypeask", true);
     m_defaults.insert("security/IconDownloadFallbackToGoogle", false);
     m_defaults.insert("GUI/Language", "system");
+    m_defaults.insert("GUI/HideToolbar", false);
     m_defaults.insert("GUI/ShowTrayIcon", false);
     m_defaults.insert("GUI/DarkTrayIcon", false);
     m_defaults.insert("GUI/MinimizeToTray", false);

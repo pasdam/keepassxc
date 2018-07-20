@@ -66,7 +66,6 @@ set(keepassx_SOURCES
     core/TimeInfo.cpp
     core/Tools.cpp
     core/Translator.cpp
-    core/Uuid.cpp
     core/Base32.h
     core/Base32.cpp
     cli/Utils.cpp
@@ -197,14 +196,8 @@ set(keepassx_SOURCES_MAINEXE
 add_feature_info(Auto-Type WITH_XC_AUTOTYPE "Automatic password typing")
 add_feature_info(Networking WITH_XC_NETWORKING "Compile KeePassXC with network access code (e.g. for downloading website icons)")
 add_feature_info(KeePassXC-Browser WITH_XC_BROWSER "Browser integration with KeePassXC-Browser")
-add_feature_info(KeePassHTTP WITH_XC_HTTP "Browser integration compatible with ChromeIPass and PassIFox (deprecated, implies Networking)")
 add_feature_info(SSHAgent WITH_XC_SSHAGENT "SSH agent integration compatible with KeeAgent")
 add_feature_info(YubiKey WITH_XC_YUBIKEY "YubiKey HMAC-SHA1 challenge-response")
-
-add_subdirectory(http)
-if(WITH_XC_NETWORKING)
-  find_package(CURL REQUIRED)
-endif()
 
 set(BROWSER_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/browser)
 add_subdirectory(browser)
@@ -254,7 +247,6 @@ add_library(keepassx_core STATIC ${keepassx_SOURCES})
 set_target_properties(keepassx_core PROPERTIES COMPILE_DEFINITIONS KEEPASSX_BUILDING_CORE)
 target_link_libraries(keepassx_core
                       autotype
-                      ${keepassxchttp_LIB}
                       ${keepassxcbrowser_LIB}
                       ${sshagent_LIB}
                       Qt5::Core
@@ -279,7 +271,7 @@ if (UNIX AND NOT APPLE)
     target_link_libraries(keepassx_core Qt5::DBus)
 endif()
 if(MINGW)
-    target_link_libraries(keepassx_core Wtsapi32.lib)
+    target_link_libraries(keepassx_core Wtsapi32.lib Ws2_32.lib)
 endif()
 
 if(MINGW)
@@ -320,11 +312,8 @@ if(APPLE AND WITH_APP_BUNDLE)
   set(CPACK_PACKAGE_FILE_NAME "${PROGNAME}-${KEEPASSXC_VERSION}")
   include(CPack)
 
-  add_custom_command(TARGET ${PROGNAME}
-                     POST_BUILD
-                     COMMAND ${MACDEPLOYQT_EXE} ${PROGNAME}.app
-                     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/src
-                     COMMENT "Deploying app bundle")
+  include(DeployQt)
+  macdeployqt(${PROGNAME})
 endif()
 
 install(TARGETS ${PROGNAME}
@@ -385,8 +374,8 @@ if(MINGW)
   set(gp_tool \"objdump\")
   " COMPONENT Runtime)
 
-  include(DeployQt4)
-  install_qt4_executable(${PROGNAME}.exe)
+  include(DeployQt)
+  windeployqt(${PROGNAME})
   
   # install Qt5 plugins
   set(PLUGINS_DIR ${Qt5_PREFIX}/share/qt5/plugins)
@@ -402,7 +391,6 @@ if(MINGW)
           ${PLUGINS_DIR}/imageformats/qicns$<$<CONFIG:Debug>:d>.dll
           ${PLUGINS_DIR}/imageformats/qico$<$<CONFIG:Debug>:d>.dll
           ${PLUGINS_DIR}/imageformats/qjpeg$<$<CONFIG:Debug>:d>.dll
-          ${PLUGINS_DIR}/imageformats/qsvg$<$<CONFIG:Debug>:d>.dll
           ${PLUGINS_DIR}/imageformats/qwebp$<$<CONFIG:Debug>:d>.dll
         DESTINATION "imageformats")
 

@@ -374,7 +374,7 @@ Ole hyvä ja valitse sallitaanko pääsy.</translation>
     </message>
     <message>
         <source>We&apos;re sorry, but KeePassXC-Browser is not supported for Snap releases at the moment.</source>
-        <translation type="unfinished"/>
+        <translation>Valitettavasti KeePassXC-Browser ei ole vielä tuettu Snap-julkaisuissa.</translation>
     </message>
 </context>
 <context>
@@ -1976,7 +1976,7 @@ Tämä voi vikaannuttaa tietoa käyttävän liitännäisen.</translation>
     </message>
     <message>
         <source>Attachments (icon)</source>
-        <translation type="unfinished"/>
+        <translation>Liitteet (kuvake)</translation>
     </message>
 </context>
 <context>
@@ -2579,6 +2579,33 @@ Tämä muunnos toimii yhdensuuntaisesti. Et välttämättä saa enää tietokant
     <message>
         <source>Invalid entry field type</source>
         <translation>Virheellinen tietueen kentän tyyppi</translation>
+    </message>
+</context>
+<context>
+    <name>KeePass2</name>
+    <message>
+        <source>AES: 256-bit</source>
+        <translation>AES: 256-bit</translation>
+    </message>
+    <message>
+        <source>Twofish: 256-bit</source>
+        <translation>Twofish: 256-bit</translation>
+    </message>
+    <message>
+        <source>ChaCha20: 256-bit</source>
+        <translation>ChaCha20: 256-bit</translation>
+    </message>
+    <message>
+        <source>AES-KDF (KDBX 4)</source>
+        <translation>AES-KDF (KDBX 4)</translation>
+    </message>
+    <message>
+        <source>AES-KDF (KDBX 3.1)</source>
+        <translation>AES-KDF (KDBX 3.1)</translation>
+    </message>
+    <message>
+        <source>Argon2 (KDBX 4 – recommended)</source>
+        <translation>Argon2 (KDBX 4 – suositeltu)</translation>
     </message>
 </context>
 <context>
@@ -3488,30 +3515,6 @@ Käytettävissä olevat komennot:
     <message>
         <source>missing closing quote</source>
         <translation>lainausmerkki puuttuu lopusta</translation>
-    </message>
-    <message>
-        <source>AES: 256-bit</source>
-        <translation>AES: 256-bit</translation>
-    </message>
-    <message>
-        <source>Twofish: 256-bit</source>
-        <translation>Twofish: 256-bit</translation>
-    </message>
-    <message>
-        <source>ChaCha20: 256-bit</source>
-        <translation>ChaCha20: 256-bit</translation>
-    </message>
-    <message>
-        <source>Argon2 (KDBX 4 – recommended)</source>
-        <translation>Argon2 (KDBX 4 – suositeltu)</translation>
-    </message>
-    <message>
-        <source>AES-KDF (KDBX 4)</source>
-        <translation>AES-KDF (KDBX 4)</translation>
-    </message>
-    <message>
-        <source>AES-KDF (KDBX 3.1)</source>
-        <translation>AES-KDF (KDBX 3.1)</translation>
     </message>
     <message>
         <source>Group</source>

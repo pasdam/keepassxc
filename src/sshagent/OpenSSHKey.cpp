@@ -18,10 +18,10 @@
 
 #include "OpenSSHKey.h"
 #include "ASN1Key.h"
+#include "crypto/SymmetricCipher.h"
+#include <QCryptographicHash>
 #include <QRegularExpression>
 #include <QStringList>
-#include <QCryptographicHash>
-#include "crypto/SymmetricCipher.h"
 
 const QString OpenSSHKey::TYPE_DSA = "DSA PRIVATE KEY";
 const QString OpenSSHKey::TYPE_RSA = "RSA PRIVATE KEY";
@@ -30,7 +30,7 @@ const QString OpenSSHKey::TYPE_OPENSSH = "OPENSSH PRIVATE KEY";
 // bcrypt_pbkdf.cpp
 int bcrypt_pbkdf(const QByteArray& pass, const QByteArray& salt, QByteArray& key, quint32 rounds);
 
-OpenSSHKey::OpenSSHKey(QObject *parent)
+OpenSSHKey::OpenSSHKey(QObject* parent)
     : QObject(parent)
     , m_type(QString())
     , m_cipherName(QString("none"))
@@ -43,7 +43,6 @@ OpenSSHKey::OpenSSHKey(QObject *parent)
     , m_comment(QString())
     , m_error(QString())
 {
-
 }
 
 OpenSSHKey::OpenSSHKey(const OpenSSHKey& other)
@@ -58,7 +57,6 @@ OpenSSHKey::OpenSSHKey(const OpenSSHKey& other)
     , m_comment(other.m_comment)
     , m_error(other.m_error)
 {
-
 }
 
 bool OpenSSHKey::operator==(const OpenSSHKey& other) const
@@ -92,8 +90,12 @@ int OpenSSHKey::keyLength() const
     return 0;
 }
 
-const QString OpenSSHKey::fingerprint() const
+const QString OpenSSHKey::fingerprint(QCryptographicHash::Algorithm algo) const
 {
+    if (m_publicData.isEmpty()) {
+        return {};
+    }
+
     QByteArray publicKey;
     BinaryStream stream(&publicKey);
 
@@ -103,9 +105,20 @@ const QString OpenSSHKey::fingerprint() const
         stream.writeString(ba);
     }
 
-    QByteArray rawHash = QCryptographicHash::hash(publicKey, QCryptographicHash::Sha256);
+    QByteArray rawHash = QCryptographicHash::hash(publicKey, algo);
 
-    return "SHA256:" + QString::fromLatin1(rawHash.toBase64(QByteArray::OmitTrailingEquals));
+    if (algo == QCryptographicHash::Md5) {
+        QString md5Hash = QString::fromLatin1(rawHash.toHex());
+        QStringList md5HashParts;
+        for (int i = 0; i < md5Hash.length(); i += 2) {
+            md5HashParts.append(md5Hash.mid(i, 2));
+        }
+        return "MD5:" + md5HashParts.join(':');
+    } else if (algo == QCryptographicHash::Sha256) {
+        return "SHA256:" + QString::fromLatin1(rawHash.toBase64(QByteArray::OmitTrailingEquals));
+    }
+
+    return "HASH:" + QString::fromLatin1(rawHash.toHex());
 }
 
 const QString OpenSSHKey::comment() const
@@ -115,6 +128,10 @@ const QString OpenSSHKey::comment() const
 
 const QString OpenSSHKey::publicKey() const
 {
+    if (m_publicData.isEmpty()) {
+        return {};
+    }
+
     QByteArray publicKey;
     BinaryStream stream(&publicKey);
 
@@ -311,9 +328,9 @@ bool OpenSSHKey::openPrivateKey(const QString& passphrase)
 
     if (m_cipherName.compare("aes-128-cbc", Qt::CaseInsensitive) == 0) {
         cipher.reset(new SymmetricCipher(SymmetricCipher::Aes128, SymmetricCipher::Cbc, SymmetricCipher::Decrypt));
-    } else if (m_cipherName == "aes256-cbc") {
+    } else if (m_cipherName == "aes256-cbc" || m_cipherName.compare("aes-256-cbc", Qt::CaseInsensitive) == 0) {
         cipher.reset(new SymmetricCipher(SymmetricCipher::Aes256, SymmetricCipher::Cbc, SymmetricCipher::Decrypt));
-    } else if (m_cipherName == "aes256-ctr") {
+    } else if (m_cipherName == "aes256-ctr" || m_cipherName.compare("aes-256-ctr", Qt::CaseInsensitive) == 0) {
         cipher.reset(new SymmetricCipher(SymmetricCipher::Aes256, SymmetricCipher::Ctr, SymmetricCipher::Decrypt));
     } else if (m_cipherName != "none") {
         m_error = tr("Unknown cipher: %1").arg(m_cipherName);
@@ -326,7 +343,7 @@ bool OpenSSHKey::openPrivateKey(const QString& passphrase)
             return false;
         }
 
-        if (passphrase.length() == 0) {
+        if (passphrase.isEmpty()) {
             m_error = tr("Passphrase is required to decrypt this key");
             return false;
         }
@@ -364,10 +381,22 @@ bool OpenSSHKey::openPrivateKey(const QString& passphrase)
             return false;
         }
 
-        QCryptographicHash hash(QCryptographicHash::Md5);
-        hash.addData(passphrase.toUtf8());
-        hash.addData(m_cipherIV.data(), 8);
-        QByteArray keyData = hash.result();
+        QByteArray keyData;
+        QByteArray mdBuf;
+        do {
+            QCryptographicHash hash(QCryptographicHash::Md5);
+            hash.addData(mdBuf);
+            hash.addData(passphrase.toUtf8());
+            hash.addData(m_cipherIV.data(), 8);
+            mdBuf = hash.result();
+            keyData.append(mdBuf);
+        } while(keyData.size() < cipher->keySize());
+
+        if (keyData.size() > cipher->keySize()) {
+            // If our key size isn't a multiple of 16 (e.g. AES-192 or something),
+            // then we will need to truncate it.
+            keyData.resize(cipher->keySize());
+        }
 
         if (!cipher->init(keyData, m_cipherIV)) {
             m_error = cipher->errorString();
